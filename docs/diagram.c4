@@ -1,0 +1,86 @@
+specification {
+    element person {
+        style {
+            shape person
+            color green
+        }
+    }
+    element softwareSystem
+    element container
+    element component
+}
+
+model {
+    user = person "UI" "Пользователь социальной сети"
+    socialNetwork = softwareSystem "Social Network" {
+        gateway = container "Gateway" {
+            description "Предоставляет REST API для запросов пользователей и обрабатывает их"
+            technology "Rust, Axum"
+        }
+
+        userService = container "User Service" {
+            description "Отвечает за регистрацию, аутентификацию и хранение информации о пользователях"
+            technology "Rust"
+            component authService "Auth Service" "Управляет аутентификацией пользователей"
+            component registerService "Registration Service" "Управляет регистрацией пользователей"
+            component api "API" "API для регистрации и других вещей"
+        }
+        userDB = container "PostgreSQL" {
+            description "Хранит данные пользователей"
+            technology "Database"
+            style {
+                shape cylinder
+            }
+        }
+        statsService = container "Stats Service" {
+            description "Подсчитывает лайки, просмотры, комментарии"
+            technology "Rust"
+            component api "API" "API статистики"
+            component statsServiceComponent "Stats Service" "Управляет статистикой"
+        }
+        statsDB = container "Clickhouse" {
+            description "Хранит данные о количестве лайков, просмотров, комментариев"
+            technology "Database"
+            style {
+                shape cylinder
+            }
+        }
+        textsService = container "Text Service" {
+            description "Обслуживает текстовые данные: посты, комментарии"
+            technology "Rust"
+        }
+        textsDB = container "PostgreSQL" {
+            description "Хранит посты и комментарии"
+            technology "Database"
+            style {
+                shape cylinder
+            }
+        } 
+        kafka = container "Kafka" {
+            description "Передача событий в сервис статистики"
+            technology "Message Broker"
+            style {
+                shape queue
+            }
+        }
+    }
+    user -> socialNetwork.gateway "Использует" "HTTPS"
+    socialNetwork.gateway -> socialNetwork.userService.api "Маршрутизирует" "JSON/HTTPS"
+    socialNetwork.gateway -> socialNetwork.statsService.api "Маршрутизирует" "JSON/HTTPS"
+    socialNetwork.gateway -> socialNetwork.textsService "Маршрутизирует"  "JSON/HTTPS"
+    socialNetwork.gateway -> socialNetwork.kafka "Публикует" "JSON/HTTPS"
+    socialNetwork.statsService.statsServiceComponent -> socialNetwork.kafka "Подписывается" "JSON/HTTPS"
+    socialNetwork.userService.authService -> socialNetwork.userDB "Читает/Пишет" "SQL"
+    socialNetwork.userService.registerService -> socialNetwork.userDB "Читает/Пишет" "SQL"
+    socialNetwork.statsService.statsServiceComponent -> socialNetwork.statsDB "Читает/Пишет" "SQL"
+    socialNetwork.textsService -> socialNetwork.textsDB "Читает/Пишет" "SQL"
+    socialNetwork.userService.api -> socialNetwork.userService.authService "Использует" 
+    socialNetwork.userService.api -> socialNetwork.userService.registerService "Использует" 
+    socialNetwork.statsService.api -> socialNetwork.statsService.statsServiceComponent "Использует"
+}
+
+views {
+    view index {
+        include *
+    }
+}
