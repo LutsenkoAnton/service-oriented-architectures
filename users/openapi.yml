@@ -1,0 +1,170 @@
+openapi: 3.1.1
+info:
+  title: User service
+  description: This service manages opeartions with users and their personal information
+paths:
+  /user:
+    post:
+      summary: Register a new user
+      description: Register a new user with given information
+      operationId: createUser
+      requestBody:
+        description: User information
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: ivan_ivanov
+                password:
+                  type: password
+                  format: password
+                  example: password
+                name:
+                  type: string
+                  example: Ivan
+                surname:
+                  type: string
+                  example: Ivanov
+                birthdate:
+                  type: string
+                  format: date
+                  example: 2025-12-31
+                status:
+                  type: string
+                  example: I'm ok
+                mail:
+                  type: string
+                  format: email
+                  example: ivan.ivanov@example.com
+                phone:
+                  type: string
+                  example: 81234567890
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Wrong format of a parameter
+        '403':
+          description: User with such username already exists
+  /user/{username}:
+    get:
+      summary: Get user by username
+      description: Get user by username
+      operationId: getUser
+      parameters:
+        - name: username
+          in: path
+          description: The name of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': 
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '$/components/schemas/User'
+        '403':
+          description: Not enough permissions to read this user data
+        '404':
+          description: User not found
+      security:
+        - cookieAuth: []
+    put:
+      summary: Change user information
+      description: Change user information
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: The name of the user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Details of the user to be changed
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200': 
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '$/components/schemas/User'
+        '400':
+          description: Wrong format of a parameter
+        '403':
+          description: Not enough permissions to update this user data
+      security:
+        - cookieAuth: []
+
+  /login:
+    get:
+      summary: Login as existing user
+      description: Login as existing user with login and password
+      operationId: login
+      parameters:
+        - name: username
+          in: query
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+          example: ivan_ivanov
+        - name: password
+          in: query
+          description: Password of the user
+          required: true
+          schema:
+            type: string
+          example: password
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Set-Cookie:
+              description: Contains session cookie 
+              schema: 
+                type: string
+                example: session=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Iml2YW5faXZhbm92IiwidGltZXN0YW1wIjoxMjM0NTY3ODl9.0TPDykRjLo4o2Px_mBNoiFMlgzXpl5SSibmGjX1yR7g
+        '403':
+          description: Wrong login or password
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Ivan
+        surname:
+          type: string
+          example: Ivanov
+        birthdate:
+          type: string
+          format: date
+          example: 2025-12-31
+        status:
+          type: string
+          example: I'm ok
+        mail:
+          type: string
+          format: email
+          example: ivan.ivanov@example.com
+        phone:
+          type: string
+          example: 81234567890

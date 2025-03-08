@@ -1,0 +1,23 @@
+services:
+  gateway:
+    build: 
+      context: gateway
+    ports:
+      - 1000:1000
+  users:
+    build: 
+      context: users
+    ports:
+      - 3000:3000
+    environment:
+      SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
+      DATABASE_URL: "postgres://postgres:tKWN094vCiOCtZ7zEWJv@userdb/soa"
+    depends_on:
+      - userdb
+  userdb:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "tKWN094vCiOCtZ7zEWJv"
+      POSTGRES_DB: "soa"
+
