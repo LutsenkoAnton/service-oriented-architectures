@@ -1,0 +1,14 @@
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username VARCHAR UNIQUE NOT NULL,
+    passhash VARCHAR NOT NULL,
+    name VARCHAR NOT NULL,
+    surname VARCHAR NOT NULL,
+    birthdate VARCHAR(10) NOT NULL,
+    status TEXT NOT NULL,
+    mail VARCHAR NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
