@@ -15,7 +15,7 @@ services:
     depends_on:
       - userdb
   userdb:
-    image: postgres:latest
+    image: postgres:17.4
     restart: always
     environment:
       POSTGRES_PASSWORD: "tKWN094vCiOCtZ7zEWJv"

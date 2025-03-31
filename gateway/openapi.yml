@@ -1,7 +1,8 @@
-openapi: 3.1.1
+openapi: 3.0.1
 info:
-  title: User service
-  description: This service manages opeartions with users and their personal information
+  version: 0.1.0
+  title: Gateway
+  description: This service distributes requests to other services
 paths:
   /user:
     post:
@@ -20,7 +21,7 @@ paths:
                   type: string
                   example: ivan_ivanov
                 password:
-                  type: password
+                  type: string
                   format: password
                   example: password
                 name:
@@ -68,7 +69,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '$/components/schemas/User'
+                $ref: '#/components/schemas/User'
         '403':
           description: Not enough permissions to read this user data
         '404':
@@ -98,7 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '$/components/schemas/User'
+                $ref: '#/components/schemas/User'
         '400':
           description: Wrong format of a parameter
         '403':
