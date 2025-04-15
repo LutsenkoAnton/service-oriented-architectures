@@ -12,6 +12,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM chef as cacher
 COPY --from=planner /opt/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo install sqlx-cli
 
 FROM chef AS builder
 
@@ -20,6 +21,8 @@ COPY Cargo.toml .
 COPY src src
 COPY proto proto
 COPY build.rs .
+COPY .sqlx .sqlx
+ENV SQLX_OFFLINE true
 COPY --from=cacher /opt/target target
 COPY --from=cacher /usr/local/cargo /usr/local/cargo
 RUN cargo build --release
@@ -27,5 +30,8 @@ RUN cargo build --release
 FROM alpine:3.21 AS runner
 
 WORKDIR /opt
-COPY --from=builder /opt/target/release/gateway .
-CMD ["./gateway", "--port", "1000"]
+COPY --from=builder /opt/target/release/posts .
+COPY --from=builder /usr/local/cargo/bin/sqlx .
+COPY migrations migrations
+COPY startup.sh .
+CMD ["./startup.sh"]

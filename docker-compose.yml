@@ -4,6 +4,11 @@ services:
       context: gateway
     ports:
       - 1000:1000
+    environment:
+      SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
+    depends_on:
+      - users
+      - posts
   users:
     build: 
       context: users
@@ -19,5 +24,21 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: "tKWN094vCiOCtZ7zEWJv"
+      POSTGRES_DB: "soa"
+  posts:
+    build: 
+      context: posts
+    ports:
+      - 5000:5000
+    environment:
+      SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
+      DATABASE_URL: "postgres://postgres:XOADIqG6MppRZMTb7cZ6QBHYfi2FhOrN@postsdb/soa"
+    depends_on:
+      - postsdb
+  postsdb:
+    image: postgres:17.4
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "XOADIqG6MppRZMTb7cZ6QBHYfi2FhOrN"
       POSTGRES_DB: "soa"
 
