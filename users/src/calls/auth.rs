@@ -16,12 +16,14 @@ use serde::{Deserialize, Serialize};
 pub struct TokenClaims {
     pub exp: u64,
     pub username: String,
+    pub userid: i32,
 }
 
-pub async fn encode_jwt(username: &str, state: &AppState) -> Result<String, StatusCode> {
+pub async fn encode_jwt(username: &str, userid: i32, state: &AppState) -> Result<String, StatusCode> {
     let claims = TokenClaims {
         exp: (Utc::now() + Duration::days(1)).timestamp() as u64,
         username: username.to_string(),
+        userid
     };
     encode(
         &Header::default(),

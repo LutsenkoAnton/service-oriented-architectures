@@ -19,7 +19,7 @@ pub async fn login(
     Query(params): Query<LoginParams>,
 ) -> Result<CookieJar, StatusCode> {
     let result = sqlx::query!(
-        "SELECT passhash FROM users WHERE username=$1;",
+        "SELECT passhash, id FROM users WHERE username=$1;",
         params.username
     )
     .fetch_optional(&state.pool)
@@ -36,7 +36,7 @@ pub async fn login(
     {
         Ok(jar.add(Cookie::new(
             "session",
-            encode_jwt(&params.username, &state).await?,
+            encode_jwt(&params.username, result.as_ref().unwrap().id, &state).await?,
         )))
     } else {
         Err(StatusCode::FORBIDDEN)
