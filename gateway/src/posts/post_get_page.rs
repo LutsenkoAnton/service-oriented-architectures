@@ -1,6 +1,6 @@
 use crate::posts::client::GetPostsPageRequest;
 use crate::state::AppState;
-use super::models::{Post, TokenClaims};
+use crate::models::{Post, TokenClaims};
 use axum::{
     Json,
     extract::{Path, State},
@@ -30,7 +30,7 @@ pub async fn post_get_page(
     .claims;
 
     let res = app_state
-        .grpc_client
+        .grpc_client_posts
         .get_posts_page(GetPostsPageRequest {
             from,
             limit,

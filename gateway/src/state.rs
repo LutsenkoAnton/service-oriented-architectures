@@ -1,8 +1,9 @@
-use std::sync::{Arc, Mutex};
 use crate::posts::client::PostsServerClient;
+use rdkafka::producer::FutureProducer;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct AppState {
-    pub grpc_client: PostsServerClient<tonic::transport::Channel>,
+    pub grpc_client_posts: PostsServerClient<tonic::transport::Channel>,
     pub secret: String,
+    pub kafka_stats: FutureProducer,
 }

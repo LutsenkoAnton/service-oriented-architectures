@@ -5,7 +5,6 @@ use axum::{
 };
 
 pub mod client;
-mod models;
 mod post_get;
 mod post_get_page;
 mod post_post;

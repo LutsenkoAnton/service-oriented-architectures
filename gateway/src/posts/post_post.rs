@@ -1,5 +1,5 @@
 use super::client::CreatePostRequest;
-use super::models::TokenClaims;
+use crate::models::TokenClaims;
 use crate::state::AppState;
 use axum::{
     extract::{Json, State},
@@ -39,7 +39,7 @@ pub async fn post_post(
     ).or(Err(StatusCode::UNAUTHORIZED))?.claims;
 
     let res = app_state
-        .grpc_client
+        .grpc_client_posts
         .create_post(CreatePostRequest {
             name: post.name,
             description: post.description,
