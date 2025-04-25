@@ -1,5 +1,5 @@
 use super::client::{PostId, DeletePostRequest};
-use super::models::TokenClaims;
+use crate::models::TokenClaims;
 use crate::state::AppState;
 use axum::{
     extract::{Path, State},
@@ -28,7 +28,7 @@ pub async fn post_delete(
     }
     let claims = claims.unwrap().claims;
     let res = app_state
-        .grpc_client
+        .grpc_client_posts
         .delete_post(DeletePostRequest {
             post_id: Some(PostId { post_id }),
             creator_id: claims.userid,

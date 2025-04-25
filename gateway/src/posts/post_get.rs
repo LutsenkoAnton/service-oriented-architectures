@@ -1,6 +1,6 @@
 use crate::posts::client::{GetByIdRequest, PostId};
 use crate::state::AppState;
-use super::models::{Post, TokenClaims};
+use crate::models::{Post, TokenClaims};
 use axum::{
     Json,
     extract::{Path, State},
@@ -30,7 +30,7 @@ pub async fn post_get(
     .claims;
 
     let res = app_state
-        .grpc_client
+        .grpc_client_posts
         .get_post_by_id(GetByIdRequest {
             post_id: Some(PostId { post_id }),
             creator_id: claims.userid,

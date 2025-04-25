@@ -1,5 +1,5 @@
 use super::client::{PostId, UpdatePostRequest};
-use super::models::TokenClaims;
+use crate::models::TokenClaims;
 use crate::state::AppState;
 use axum::{
     Json,
@@ -53,7 +53,7 @@ pub async fn post_put(
     }
 
     let res = app_state
-        .grpc_client
+        .grpc_client_posts
         .update_post(UpdatePostRequest {
             post_id: Some(PostId { post_id }),
             name: post.name,
