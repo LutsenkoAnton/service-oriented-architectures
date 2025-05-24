@@ -8,9 +8,12 @@ services:
       SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
       BROKERS: "stats_broker:9092"
     depends_on:
-      - users
-      - posts
-      - stats_broker
+      users:
+        condition: service_started
+      posts:
+        condition: service_started
+      stats_broker:
+        condition: service_started
   users:
     build: 
       context: users
@@ -19,14 +22,23 @@ services:
     environment:
       SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
       DATABASE_URL: "postgres://postgres:tKWN094vCiOCtZ7zEWJv@userdb/soa"
+      POSTGRES_DB: "soa"
     depends_on:
-      - userdb
+      userdb:
+        condition: service_healthy
+        restart: true
   userdb:
     image: postgres:17.4
     restart: always
     environment:
       POSTGRES_PASSWORD: "tKWN094vCiOCtZ7zEWJv"
       POSTGRES_DB: "soa"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d soa"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
   posts:
     build: 
       context: posts
@@ -35,14 +47,23 @@ services:
     environment:
       SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
       DATABASE_URL: "postgres://postgres:XOADIqG6MppRZMTb7cZ6QBHYfi2FhOrN@postsdb/soa"
+      POSTGRES_DB: "soa"
     depends_on:
-      - postsdb
+      postsdb:
+        condition: service_healthy
+        restart: true
   postsdb:
     image: postgres:17.4
     restart: always
     environment:
       POSTGRES_PASSWORD: "XOADIqG6MppRZMTb7cZ6QBHYfi2FhOrN"
       POSTGRES_DB: "soa"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d soa"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
   stats_broker:
     image: apache/kafka:4.0.0
     ports:
@@ -53,25 +74,3 @@ services:
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: HOST://stats_broker:9092,DOCKER://stats_broker:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
-
-      # Settings required for KRaft mode
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
-
-      # Listener to use for broker-to-broker communication
-      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
-
-      # Required for a single node cluster
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-      KAFKA_JMX_PORT: 9997
-      KAFKA_JMX_HOSTNAME: kafka
-  kafka-ui:
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    ports:
-      - 8082:8080
-    environment:
-      DYNAMIC_CONFIG_ENABLED: true

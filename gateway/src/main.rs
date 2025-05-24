@@ -16,8 +16,12 @@ pub mod models;
 
 async fn init_app() -> Router {
     let brokers = std::env::var("BROKERS").expect("BROKERS should be set");
+    let mut grpc = PostsServerClient::connect("http://posts:5000").await;
+    while grpc.is_err() {
+        grpc = PostsServerClient::connect("http://posts:5000").await;
+    }
     let app_state = AppState {
-        grpc_client_posts: PostsServerClient::connect("http://posts:5000").await.unwrap(),
+        grpc_client_posts: grpc.unwrap(),
         secret: std::env::var("SECRET").expect("SECRET should be set"),
         kafka_stats: ClientConfig::new()
             .set("bootstrap.servers", brokers)
