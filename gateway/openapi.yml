@@ -184,8 +184,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Post'
-        '403':
-          description: Not enough permissions to read this post data
         '404':
           description: Post not found
       security:
@@ -247,6 +245,81 @@ paths:
                 $ref: '#/components/schemas/Post'
       security:
         - cookieAuth: []
+  /view:
+    post:
+      summary: View a post
+      description: Informs the system about a view of a post
+      operationID: viewPost
+      requestBody:
+        description: Information of viewed post
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                post_id:
+                  type: integer
+                  format: int64
+                  example: 3
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          description: Submit to kafka failed
+  /like:
+    post:
+      summary: Like a post
+      description: Informs the system about a like of a post
+      operationID: likePost
+      requestBody:
+        description: Information of liked post
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                post_id:
+                  type: integer
+                  format: int64
+                  example: 3
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          description: Submit to kafka failed
+  /comment:
+    post:
+      summary: Comment a post
+      description: Submits a comment of a post
+      operationID: commentPost
+      requestBody:
+        description: Information about the comment
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                post_id:
+                  type: integer
+                  format: int64
+                  example: 3
+                comment:
+                  type: string
+                  example: This post is very good!
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          description: Submit to kafka failed
 components:
   securitySchemes:
     cookieAuth:
@@ -304,4 +377,6 @@ components:
           type: boolean
           example: false
         tags:
-          type: 
+          type: array
+          items:
+            type: string

@@ -9,7 +9,7 @@ use argon2::{
 };
 use axum::{
     extract::{Json, State},
-    http::StatusCode,
+    http::StatusCode, response::IntoResponse,
 };
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct User {
@@ -23,7 +23,12 @@ pub struct User {
     phone: String,
 }
 
-async fn inner_create_user(user: User, state: AppState) -> Result<StatusCode> {
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct UserId {
+    id: i32,
+}
+
+async fn inner_create_user(user: User, state: AppState) -> Result<std::result::Result<impl IntoResponse, StatusCode>> {
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
     let password_hash = argon2
@@ -31,22 +36,22 @@ async fn inner_create_user(user: User, state: AppState) -> Result<StatusCode> {
         .map_err(|err| Error::Argon2(err))?
         .to_string();
     if !check_name(&user.name) {
-        return Ok(StatusCode::BAD_REQUEST);
+        return Ok(Err(StatusCode::BAD_REQUEST));
     }
     if !check_name(&user.surname) {
-        return Ok(StatusCode::BAD_REQUEST);
+        return Ok(Err(StatusCode::BAD_REQUEST));
     }
     if !check_birthdate(&user.birthdate) {
-        return Ok(StatusCode::BAD_REQUEST);
+        return Ok(Err(StatusCode::BAD_REQUEST));
     }
     if !check_email(&user.mail) {
-        return Ok(StatusCode::BAD_REQUEST);
+        return Ok(Err(StatusCode::BAD_REQUEST));
     }
     if !check_phone(&user.phone) {
-        return Ok(StatusCode::BAD_REQUEST);
+        return Ok(Err(StatusCode::BAD_REQUEST));
     }
-    let row_count = sqlx::query!(
-        "INSERT INTO users (username, passhash, name, surname, birthdate, status, mail, phone, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now()) ON CONFLICT DO NOTHING;",
+    let id = sqlx::query!(
+        "INSERT INTO users (username, passhash, name, surname, birthdate, status, mail, phone, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now()) ON CONFLICT DO NOTHING RETURNING id;",
         user.username,
         password_hash,
         user.name,
@@ -55,14 +60,13 @@ async fn inner_create_user(user: User, state: AppState) -> Result<StatusCode> {
         user.status,
         user.mail,
         user.phone,
-    ).execute(&state.pool).await?.rows_affected();
-    if row_count == 0 {
-        Ok(StatusCode::FORBIDDEN)
-    } else {
-        Ok(StatusCode::OK)
+    ).fetch_optional(&state.pool).await?;
+    match id {
+        None => Ok(Err(StatusCode::FORBIDDEN)),
+        Some(v) => Ok(Ok(Json(UserId{id: v.id}))),
     }
 }
-pub async fn create_user(State(state): State<AppState>, Json(user): Json<User>) -> StatusCode {
+pub async fn create_user(State(state): State<AppState>, Json(user): Json<User>) -> std::result::Result<impl IntoResponse, StatusCode> {
     inner_create_user(user, state)
         .await
         .expect("create_user failed")

@@ -1,6 +1,6 @@
 FROM rust:1.85-alpine3.21 AS chef
 WORKDIR /opt
-RUN apk update && apk add ca-certificates git openssl-dev gcc g++ libc-dev binutils openssl-libs-static protobuf-dev
+RUN apk update && apk add ca-certificates git openssl-dev gcc g++ libc-dev binutils openssl-libs-static protobuf-dev bash python3 make cmake zlib-dev zlib-static
 RUN cargo install cargo-chef
 
 FROM chef AS planner
