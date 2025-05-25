@@ -4,7 +4,7 @@ use clap::Parser;
 use users::route_users;
 use state::AppState;
 use posts::{route_posts, client::PostsServerClient};
-use stats::route_stats;
+use stats::{route_stats, client::StatsClient};
 use rdkafka::config::ClientConfig;
 
 mod args;
@@ -18,6 +18,7 @@ async fn init_app() -> Router {
     let brokers = std::env::var("BROKERS").expect("BROKERS should be set");
     let app_state = AppState {
         grpc_client_posts: PostsServerClient::connect("http://posts:5000").await.unwrap(),
+        grpc_client_stats: StatsClient::connect("http://stats:7000").await.unwrap(),
         secret: std::env::var("SECRET").expect("SECRET should be set"),
         kafka_stats: ClientConfig::new()
             .set("bootstrap.servers", brokers)
