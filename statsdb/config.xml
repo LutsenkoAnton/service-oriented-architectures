@@ -1,0 +1,7 @@
+<clickhouse>
+    <profiles>
+        <default replace="replace">
+            <date_time_input_format>best_effort</date_time_input_format>
+        </default>
+    </profiles>
+</clickhouse>

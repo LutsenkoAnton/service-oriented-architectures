@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   version: 0.1.0
   title: Gateway
@@ -249,7 +249,7 @@ paths:
     post:
       summary: View a post
       description: Informs the system about a view of a post
-      operationID: viewPost
+      operationId: viewPost
       requestBody:
         description: Information of viewed post
         required: true
@@ -273,7 +273,7 @@ paths:
     post:
       summary: Like a post
       description: Informs the system about a like of a post
-      operationID: likePost
+      operationId: likePost
       requestBody:
         description: Information of liked post
         required: true
@@ -297,7 +297,7 @@ paths:
     post:
       summary: Comment a post
       description: Submits a comment of a post
-      operationID: commentPost
+      operationId: commentPost
       requestBody:
         description: Information about the comment
         required: true
@@ -320,6 +320,176 @@ paths:
           description: Successful operation
         '500':
           description: Submit to kafka failed
+  /stats/{post_id}:
+    get:
+      summary: Get stats
+      description: Get number of comments under a post
+      operationId: getStats
+      parameters:
+        - name: post_id
+          in: path
+          description: The id of the post, for which the count is requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200': 
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: integer
+                    format: int64
+                  likes:
+                    type: integer
+                    format: int64
+                  views:
+                    type: integer
+                    format: int64
+      security:
+        - cookieAuth: []
+  /dynamics/comments/{post_id}:
+    get:
+      summary: Get comments dynamics
+      description: Returns number of comments under the post grouped by day
+      operationId: dynamicsComments
+      parameters:
+        - name: post_id
+          in: path
+          description: The id of the post, for which the dynamics are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200': 
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dynamics'
+      security:
+        - cookieAuth: []
+  /dynamics/likes/{post_id}:
+    get:
+      summary: Get likes dynamics
+      description: Returns number of likes under the post grouped by day
+      operationId: dynamicsLikes
+      parameters:
+        - name: post_id
+          in: path
+          description: The id of the post, for which the dynamics are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200': 
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dynamics'
+      security:
+        - cookieAuth: []
+  /dynamics/views/{post_id}:
+    get:
+      summary: Get views dynamics
+      description: Returns number of views under the post grouped by day
+      operationId: dynamicsViews
+      parameters:
+        - name: post_id
+          in: path
+          description: The id of the post, for which the dynamics are requested
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200': 
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dynamics'
+      security:
+        - cookieAuth: []
+  /top/posts/{order}:
+    get:
+      summary: Get top 10 posts
+      description: Returns Top 10 posts ordered by likes, views or comments
+      operationId: topPosts
+      parameters:
+        - name: order
+          in: path
+          description: The parameter, by which the posts are sorted
+          required: true
+          schema:
+            type: integer
+            oneOf:
+            - title: VIEWS
+              const: 0
+            - title: LIKES
+              const: 1
+            - title: COMMENTS
+              const: 2
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    post_id:
+                      type: integer
+                      format: int64
+        '400':
+          description: Wrong ordering
+      security:
+        - cookieAuth: []
+  /top/users/{order}:
+    get:
+      summary: Get top 10 users
+      description: Returns Top 10 users ordered by likes, views or comments
+      operationId: topUsers
+      parameters:
+        - name: order
+          in: path
+          description: The parameter, by which the users are sorted
+          required: true
+          schema:
+            type: integer
+            oneOf:
+              - title: VIEWS
+                const: 0
+              - title: LIKES
+                const: 1
+              - title: COMMENTS
+                const: 2
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    post_id:
+                      type: integer
+                      format: int32
+        '400':
+          description: Wrong ordering
+      security:
+        - cookieAuth: []
 components:
   securitySchemes:
     cookieAuth:
@@ -380,3 +550,15 @@ components:
           type: array
           items:
             type: string
+    Dynamics:
+      type: array
+      items:
+        type: object
+        properties:
+          count:
+            type: integer
+            format: int64
+          day:
+            type: string
+            format: date
+            example: 2025-05-24
