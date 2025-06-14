@@ -51,7 +51,7 @@ pub async fn auth(
         &DecodingKey::from_secret(state.secret.as_ref()),
         &Validation::default(),
     )
-    .or(Err(StatusCode::INTERNAL_SERVER_ERROR))?
+    .or(Err(StatusCode::FORBIDDEN))?
     .claims;
 
     let username = claims.username;

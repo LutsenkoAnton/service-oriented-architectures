@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package stats;
+
+service Stats {
+    rpc CountActivity(CountActivityRequest) returns (CountActivityResponse);
+    rpc Dynamics(DynamicsRequest) returns (stream DynamicsResponse);
+    rpc GetTop10Posts(GetTop10PostsRequest) returns (stream GetTop10PostsResponse);
+    rpc GetTop10Users(GetTop10UsersRequest) returns (stream GetTop10UsersResponse);
+}
+
+enum ActivityType {
+    VIEWS = 0;
+    LIKES = 1;
+    COMMENTS = 2;
+}
+
+message CountActivityRequest {
+    int64 post_id = 1;
+}
+
+message CountActivityResponse {
+    uint64 comments = 1;
+    uint64 likes = 2;
+    uint64 views = 3;
+}
+
+message DynamicsRequest {
+    int64 post_id = 1;
+    ActivityType type = 2;
+}
+
+message DynamicsResponse {
+    uint64 count = 1;
+    string day = 2;
+}
+
+message GetTop10PostsRequest {
+    ActivityType type = 1;
+}
+
+message GetTop10PostsResponse {
+    int64 post_id = 1;
+}
+
+message GetTop10UsersRequest {
+    ActivityType type = 1;
+}
+
+message GetTop10UsersResponse {
+    int32 user_id = 1;
+}

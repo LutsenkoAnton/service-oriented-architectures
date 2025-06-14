@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package posts;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+
+service PostsServer {
+    rpc CreatePost(CreatePostRequest) returns (PostId);
+    rpc DeletePost(DeletePostRequest) returns (google.protobuf.Empty);
+    rpc UpdatePost(UpdatePostRequest) returns (google.protobuf.Empty);
+    rpc GetPostByID(GetByIDRequest) returns (Post);
+    rpc GetPostsPage(GetPostsPageRequest) returns (Posts);  
+}
+
+message CreatePostRequest {
+    string name = 1;
+    string description = 2;
+    int32 creator_id = 3;
+    bool is_private = 4;
+    repeated string tags = 5;
+}
+message DeletePostRequest {
+    PostId post_id = 1;
+    int32 creator_id = 2;
+}
+
+message UpdatePostRequest {
+    PostId post_id = 1;
+    int32 creator_id = 2;
+    optional string name = 3;
+    optional string description = 4;
+    optional bool is_private = 5;
+    repeated string tags = 6;
+    google.protobuf.FieldMask field_mask = 7;
+}
+
+message GetByIDRequest {
+    PostId post_id = 1;
+    int32 creator_id = 2;
+}
+
+message GetPostsPageRequest {
+    int32 creator_id = 1;
+    int32 from = 2;
+    int32 limit = 3;
+}
+
+message PostId {
+    int64 post_id = 1;
+}
+
+message Post {
+    PostId id = 1;
+    string name = 2;
+    string description = 3;
+    int32 creator_id = 4;
+    google.protobuf.Timestamp creation_time = 5;
+    google.protobuf.Timestamp update_time = 6;
+    bool is_private = 7;
+    repeated string tags = 8;
+}
+
+message Posts {
+    repeated Post posts = 1;
+}

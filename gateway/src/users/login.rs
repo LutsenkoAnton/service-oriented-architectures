@@ -1,5 +1,7 @@
-use axum::{extract::Query, http::StatusCode};
+use axum::{extract::{Query, State}, http::StatusCode};
 use axum_extra::extract::cookie::{Cookie, CookieJar};
+
+use crate::state::AppState;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct LoginParams {
@@ -10,13 +12,14 @@ pub struct LoginParams {
 pub async fn login(
     mut jar: CookieJar,
     Query(params): Query<LoginParams>,
+    State(app_state): State<AppState>,
 ) -> Result<CookieJar, StatusCode> {
     let client = reqwest::Client::builder()
         .cookie_store(true)
         .build()
         .unwrap();
     let res = client
-        .get("http://users:3000/login")
+        .get(format!("{}/login", &app_state.users_url))
         .query(&[("username", params.username), ("password", params.password)])
         .send()
         .await

@@ -1,0 +1,9 @@
+DROP VIEW views_mv;
+DROP TABLE views_queue;
+DROP TABLE views;
+DROP VIEW likes_mv;
+DROP TABLE likes_queue;
+DROP TABLE likes;
+DROP VIEW comments_mv;
+DROP TABLE comments_queue;
+DROP TABLE comments;

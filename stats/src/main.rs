@@ -14,11 +14,12 @@ use clickhouse::Client;
 async fn main() -> Result<()> {
     let args = args::Args::parse();
     let addr = format!("0.0.0.0:{}", args.port);
+    let database_url = std::env::var("DATABASE_URL").expect("Clickhouse url should be set");
     let user = std::env::var("CLICKHOUSE_USER").expect("Clickhouse username should be set");
     let pass = std::env::var("CLICKHOUSE_PASSWORD").expect("Clickhouse password should be set");
     let server = MyStatsServer {
         client: Client::default()
-            .with_url("http://statsdb:8123")
+            .with_url(database_url)
             .with_user(user)
             .with_password(pass)
     };

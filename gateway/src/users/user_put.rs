@@ -1,7 +1,15 @@
-use axum::{Json, body::Body, extract::Path, http::StatusCode, response::Response};
+use axum::{
+    Json,
+    body::Body,
+    extract::{Path, State},
+    http::StatusCode,
+    response::Response,
+};
 use axum_extra::extract::cookie::CookieJar;
 use reqwest::{Client, Url, cookie::Jar};
 use std::sync::Arc;
+
+use crate::state::AppState;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct User {
@@ -16,6 +24,7 @@ pub struct User {
 pub async fn user_put(
     jar: CookieJar,
     Path(username): Path<String>,
+    State(app_state): State<AppState>,
     Json(user): Json<User>,
 ) -> Response {
     let session = jar
@@ -30,7 +39,7 @@ pub async fn user_put(
         .build()
         .unwrap();
     let res = client
-        .put(format!("http://users:3000/user/{}", username))
+        .put(format!("{}/user/{}", &app_state.users_url, username))
         .json(&user)
         .send()
         .await;
