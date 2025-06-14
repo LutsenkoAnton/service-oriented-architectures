@@ -16,16 +16,20 @@ pub mod models;
 
 async fn init_app() -> Router {
     let brokers = std::env::var("BROKERS").expect("BROKERS should be set");
+    let users_url = std::env::var("USERS_URL").expect("USERS_URL should be set");
+    let posts_url = std::env::var("POSTS_URL").expect("POSTS_URL should be set");
+    let stats_url = std::env::var("STATS_URL").expect("STATS_URL should be set");
     let app_state = AppState {
-        grpc_client_posts: PostsServerClient::connect("http://posts:5000").await.unwrap(),
-        grpc_client_stats: StatsClient::connect("http://stats:7000").await.unwrap(),
+        grpc_client_posts: PostsServerClient::connect(posts_url).await.unwrap(),
+        grpc_client_stats: StatsClient::connect(stats_url).await.unwrap(),
         secret: std::env::var("SECRET").expect("SECRET should be set"),
         kafka_stats: ClientConfig::new()
             .set("bootstrap.servers", brokers)
             .set("message.timeout.ms", "5000")
             .set("delivery.timeout.ms", "5000")
             .create()
-            .expect("Failed to create kafka producer")
+            .expect("Failed to create kafka producer"),
+        users_url
     };
     let mut router:Router<AppState> = Router::new();
     router = route_users(router);

@@ -9,7 +9,7 @@ COPY Cargo.toml .
 COPY src/main.rs src/
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef as cacher
+FROM chef AS cacher
 COPY --from=planner /opt/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 RUN cargo install chm

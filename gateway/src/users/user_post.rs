@@ -33,7 +33,7 @@ struct KafkaUser {
 pub async fn user_post(State(app_state): State<AppState>, Json(user): Json<User>) -> StatusCode {
     let client = reqwest::Client::new();
     let res = client
-        .post("http://users:3000/user")
+        .post(format!("{}/user", &app_state.users_url))
         .json(&user)
         .send()
         .await;
@@ -43,6 +43,9 @@ pub async fn user_post(State(app_state): State<AppState>, Json(user): Json<User>
 
     let res = res.unwrap();
     let status = res.status();
+    if !status.is_success() {
+        return status;
+    }
     let id = res.json::<UserId>().await.unwrap().id;
     let str_user = serde_json::to_string(&KafkaUser {
         id,

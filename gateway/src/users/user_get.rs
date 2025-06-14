@@ -1,9 +1,19 @@
-use axum::{body::Body, extract::Path, http::StatusCode, response::Response};
+use crate::state::AppState;
+use axum::{
+    body::Body,
+    extract::{Path, State},
+    http::StatusCode,
+    response::Response,
+};
 use axum_extra::extract::cookie::CookieJar;
 use reqwest::{Client, Url, cookie::Jar};
 use std::sync::Arc;
 
-pub async fn user_get(jar: CookieJar, Path(username): Path<String>) -> Response {
+pub async fn user_get(
+    jar: CookieJar,
+    Path(username): Path<String>,
+    State(app_state): State<AppState>,
+) -> Response {
     let session = jar
         .get("session")
         .map(|cookie| cookie.to_string())
@@ -17,7 +27,7 @@ pub async fn user_get(jar: CookieJar, Path(username): Path<String>) -> Response 
         .unwrap();
 
     let res = client
-        .get(format!("http://users:3000/user/{}", username))
+        .get(format!("{}/user/{}", &app_state.users_url, username))
         .send()
         .await;
     match res {

@@ -7,6 +7,9 @@ services:
     environment:
       SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
       BROKERS: "stats_broker:9092"
+      USERS_URL: "http://users:3000"
+      POSTS_URL: "http://posts:5000"
+      STATS_URL: "http://stats:7000"
     depends_on:
       users:
         condition: service_started
@@ -71,9 +74,9 @@ services:
       context: stats
     ports:
       - 7000:7000
-      - 6999:6999
     environment:
       SECRET: "TXnXRjvodoWrDp4RI5l7LDs6j2AOIgRtW0mj1eEXhFZ70bmgihklCKD7O2UxoWT4"
+      DATABASE_URL: "http://statsdb:8123"
       CLICKHOUSE_USER: "soa"
       CLICKHOUSE_PASSWORD: "NgeFBacODqTUXVKXn6dDhu5NlNsSBJq1"
     depends_on:
